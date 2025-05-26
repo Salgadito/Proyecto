@@ -12,4 +12,11 @@ SCRAPERS = {
         "url": "https://cobrocoactivo.ramajudicial.gov.co/Home/Bdme_Read",
         "max_concurrent": 100,
     },
+
+        "Declaraciones Función Pública": {  # << AÑADIR ESTA ENTRADA
+        "max_concurrent": 10,
+        #"verify_ssl": False
+    }
 }
+
+
