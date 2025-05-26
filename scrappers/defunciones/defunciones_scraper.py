@@ -10,15 +10,22 @@ class DefuncionesScraper:
         self.max_concurrent = max_concurrent
         self.semaphore = asyncio.Semaphore(max_concurrent)
 
-    async def _fetch(self, session: ClientSession, nuip: str) -> dict:
-        payload = {"nuip": nuip}
-        try:
-            async with session.post(self.url, json=payload, timeout=10) as resp:
-                data = await resp.json()
-                vigencia = data.get("vigencia", "No disponible")
-        except Exception:
-            vigencia = "Error"
-        return {"Documento": nuip, "Vigencia": vigencia}
+        async def _fetch(self, session: ClientSession, nuip: str) -> dict:
+            payload = {"nuip": nuip}
+            try:
+                async with session.post(self.url, json=payload, timeout=10) as resp:
+                    if resp.status == 200:
+                        try:
+                            data = await resp.json()
+                            vigencia = data.get("vigencia", "No disponible")
+                        except Exception:
+                            vigencia = "Error de JSON"
+                    else:
+                        vigencia = f"HTTP {resp.status}"
+            except Exception:
+                vigencia = "Error de red"
+            return {"Documento": nuip, "Vigencia": vigencia}
+
 
     async def _limited_task(self, session: ClientSession, doc: str) -> dict:
         async with self.semaphore:
