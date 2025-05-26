@@ -2,6 +2,10 @@ import asyncio
 from typing import List
 import pandas as pd
 from aiohttp import ClientSession
+import logging
+
+# Al inicio de tu archivo
+logging.basicConfig(level=logging.INFO)
 
 
 class DefuncionesScraper:
@@ -14,18 +18,13 @@ class DefuncionesScraper:
         payload = {"nuip": nuip}
         try:
             async with session.post(self.url, json=payload, timeout=10) as resp:
-                if resp.status == 200:
-                    try:
-                        data = await resp.json()
-                        vigencia = data.get("vigencia", "No disponible")
-                    except Exception:
-                        vigencia = "Error de JSON"
-                else:
-                    vigencia = f"HTTP {resp.status}"
-        except Exception:
-            vigencia = "Error de red"
-            return {"Documento": nuip, "Vigencia": vigencia}
-
+                data = await resp.json()
+                vigencia = data.get("vigencia", "No disponible")
+        # Dentro del try-except en _fetch
+        except Exception as e:
+            logging.warning(f"Error al consultar {nuip}: {e}")
+            vigencia = "Error"
+        return {"Documento": nuip, "Vigencia": vigencia}
 
     async def _limited_task(self, session: ClientSession, doc: str) -> dict:
         async with self.semaphore:
