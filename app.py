@@ -11,8 +11,8 @@ from auth.auth import login, register_user
 
 
 def main():
-    st.set_page_config(page_title="KnowMe", layout="wide")
-
+    st.set_page_config(page_title="KnowMe", layout="wide",page_icon="Logo.jpg")
+    
     # --- Inicio de sesión ---
     if "authenticated" not in st.session_state:
         st.session_state["authenticated"] = False
@@ -22,7 +22,7 @@ def main():
         st.stop()
 
     register_user()
-
+    st.image("Logo.jpg", width=200)
     st.title("📡 KnowMe")
     st.markdown(
         "Sube un archivo CSV o Excel con una sola columna de Documentos "
