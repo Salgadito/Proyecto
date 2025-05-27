@@ -1,9 +1,12 @@
 import asyncio
 from typing import List
-
 import pandas as pd
 from aiohttp import ClientSession, TCPConnector
+import logging
+import random
 
+# Configura el logging
+logging.basicConfig(level=logging.INFO)
 
 class DeudoresScraper:
     """
@@ -11,7 +14,7 @@ class DeudoresScraper:
     Usa semáforo y connector para limitar concurrencia.
     """
 
-    def __init__(self, url: str, max_concurrent: int) -> None:
+    def __init__(self, url: str, max_concurrent: int, max_retries: int = 3) -> None:
         """
         Parameters
         ----------
@@ -19,9 +22,12 @@ class DeudoresScraper:
             Endpoint para POST.
         max_concurrent : int
             Máximo de peticiones concurrentes.
+        max_retries : int
+            Máximo de reintentos por documento.
         """
         self.url = url
         self.max_concurrent = max_concurrent
+        self.max_retries = max_retries
         self.semaphore = asyncio.Semaphore(max_concurrent)
 
     async def _fetch(self, session: ClientSession, doc: str) -> dict:
@@ -34,25 +40,30 @@ class DeudoresScraper:
             {'Documento': doc, 'Sancionado': ..., 'Estado': ...}.
         """
         payload = {"Documento": doc}
-        try:
-            async with session.post(self.url, json=payload, timeout=30) as resp:
-                if resp.status == 200:
-                    data = await resp.json()
-                    total = data.get("Total", 0)
-                    items = data.get("Data", [])
-                    if total and items:
-                        sancionado = items[0].get("Sancionado")
-                        estado = "Moroso"
+        for attempt in range(1, self.max_retries + 1):
+            try:
+                async with session.post(self.url, json=payload, timeout=30) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        total = data.get("Total", 0)
+                        items = data.get("Data", [])
+                        if total and items:
+                            sancionado = items[0].get("Sancionado")
+                            estado = "Moroso"
+                        else:
+                            sancionado = None
+                            estado = "No moroso"
                     else:
                         sancionado = None
-                        estado = "No moroso"
+                        estado = f"Error {resp.status}"
+                    return {"Documento": doc, "Sancionado": sancionado, "Estado": estado}
+            except Exception as e:
+                logging.warning(f"Intento {attempt} fallido para {doc}: {e}")
+                if attempt < self.max_retries:
+                    wait = random.uniform(1, 3) * attempt
+                    await asyncio.sleep(wait)
                 else:
-                    sancionado = None
-                    estado = f"Error {resp.status}"
-        except Exception:
-            sancionado = None
-            estado = "Error"
-        return {"Documento": doc, "Sancionado": sancionado, "Estado": estado}
+                    return {"Documento": doc, "Sancionado": None, "Estado": "Error"}
 
     async def _limited_task(self, session: ClientSession, doc: str) -> dict:
         """
@@ -80,7 +91,6 @@ class DeudoresScraper:
         -------
         pd.DataFrame
         """
-        # Creamos el connector dentro de un event loop activo
         connector = TCPConnector(limit_per_host=self.max_concurrent)
 
         async with ClientSession(connector=connector) as session:
