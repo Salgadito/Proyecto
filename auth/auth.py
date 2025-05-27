@@ -23,6 +23,8 @@ USERS = load_users()
 
 def login():
     st.sidebar.title("🔐 Iniciar Sesión")
+    st.image("Logo.jpg", width=200)  # 👈 Aquí agregas el logo
+
     
     if st.session_state.get("authenticated"):
         st.sidebar.success(f"👤 Usuario: {st.session_state['user']}")
