@@ -47,7 +47,7 @@ def login():
 def register_user():
     st.subheader("🧾 Registro de Usuario (solo Admin)")
     
-    if st.session_state.get("user") != "admin":
+    if st.session_state.get("user", "").lower() != "admin":
         st.warning("Solo el administrador puede registrar nuevos usuarios.")
         return
 
