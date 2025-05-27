@@ -2,6 +2,7 @@ import asyncio
 from time import perf_counter
 import pandas as pd
 import streamlit as st
+import inspect
 
 from config.scrappers_config import SCRAPERS
 from scrappers import SCRAPER_CLASSES
@@ -76,8 +77,14 @@ def main():
 
             scraper = ScraperClass(**cfg)
             try:
-                df_res = asyncio.run(scraper.run(nuips, progress_bar, progress_label))
+                #df_res = asyncio.run(scraper.run(nuips, progress_bar, progress_label))
+                run_method = scraper.run
+                is_async = inspect.iscoroutinefunction(run_method)
 
+                if is_async:
+                    df_res = asyncio.run(run_method(nuips, progress_bar, progress_label))
+                else:
+                    df_res = run_method(nuips, progress_bar, progress_label)
                 # Aseguramos que haya una columna 'Documento' para hacer merge
                 if "Documento" not in df_res.columns:
                     st.error(f"El scraper '{choice}' no devuelve columna 'Documento'.")

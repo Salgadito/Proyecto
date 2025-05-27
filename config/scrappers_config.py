@@ -12,11 +12,15 @@ SCRAPERS = {
         "url": "https://cobrocoactivo.ramajudicial.gov.co/Home/Bdme_Read",
         "max_concurrent": 100,
     },
-
-        "Declaraciones Función Pública": {  # << AÑADIR ESTA ENTRADA
+    "Declaraciones Función Pública": {
         "max_concurrent": 10,
-        #"verify_ssl": False
+    },
+    "Lista OFAC (SDN)": {  # 👈 NUEVA ENTRADA
+        # No requiere configuración de red
     }
 }
+
+
+
 
 
