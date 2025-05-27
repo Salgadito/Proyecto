@@ -49,7 +49,7 @@ def main():
 
         selected_scrapers = [
             name for name in SCRAPERS.keys()
-            if st.checkbox(f"Scraper: {name}")
+            if st.checkbox(f"Opción: {name}")
         ]
 
         run_button = st.button("Iniciar consultas")
