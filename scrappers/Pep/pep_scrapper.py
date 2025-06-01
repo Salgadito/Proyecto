@@ -7,7 +7,7 @@ from aiohttp import ClientSession, TCPConnector
 from asyncio import Semaphore
 
 class FuncionPublicaScraper:
-    def __init__(self, max_concurrent=1000, max_retries=3):
+    def __init__(self, max_concurrent=100, max_retries=3):
         self.BASE_URL = "https://www.funcionpublica.gov.co/fdci/consultaCiudadana/index"
         self.HEADERS = {
             "User-Agent": (

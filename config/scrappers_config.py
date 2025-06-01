@@ -13,12 +13,15 @@ SCRAPERS = {
         "max_concurrent": 1000,
     },
     "Declaraciones Función Pública": {
-        "max_concurrent": 1000,
+        "max_concurrent": 100,
     },
     "Lista OFAC (SDN)": {  # 👈 NUEVA ENTRADA
         # No requiere configuración de red
+    },
+    "Unión Europea":{
     }
 }
+
 
 
 
