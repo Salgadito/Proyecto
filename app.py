@@ -58,7 +58,7 @@ st.markdown("""
 def _display_sidebar():
     """Muestra la barra lateral con opciones de sesión y admin."""
     with st.sidebar:
-        st.image("Logo.jpg", use_column_width=True)
+        st.image("Logo.jpg", use_container_width=True)
         st.header("⚙️ Opciones")
         
         if "user" in st.session_state and st.session_state.get("user") is not None:
